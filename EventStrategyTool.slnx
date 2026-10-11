@@ -1,0 +1,7 @@
+<Solution>
+  <Project Path="Core/Core.csproj" />
+  <Project Path="CoreWeApp/CoreWebApp.csproj" />
+  <Project Path="Domain/Domain.csproj" />
+  <Project Path="EventStrategyTool/EventStrategyTool.csproj" />
+  <Project Path="EventStrategyToolAPI/EventStrategyToolAPI.csproj" />
+</Solution>

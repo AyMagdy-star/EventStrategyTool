@@ -1,0 +1,6 @@
+@EventStrategyToolAPI_HostAddress = http://localhost:5028
+
+GET {{EventStrategyToolAPI_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
