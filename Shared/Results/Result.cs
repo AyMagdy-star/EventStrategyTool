@@ -1,4 +1,4 @@
-namespace EventStrategyTool.Shared.Results;
+namespace Shared.Results;
 
 public class Result
 {

@@ -1,4 +1,4 @@
-namespace EventStrategyTool.Shared.Results;
+namespace Shared.Results;
 
 public enum ErrorType { Validation, NotFound, Conflict, Forbidden, Unexpected }
 
