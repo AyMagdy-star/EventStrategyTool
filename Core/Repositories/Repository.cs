@@ -1,5 +1,5 @@
 using System.Linq.Expressions;
-using Core.Interface;
+using Core.Interface.IRepository;
 using Microsoft.EntityFrameworkCore;
 
 namespace Core.Repositories;

@@ -1,3 +1,5 @@
+using Core.Interface.IRepository;
+
 namespace Core.Interface;
 
 public interface IUnitOfWork : IAsyncDisposable

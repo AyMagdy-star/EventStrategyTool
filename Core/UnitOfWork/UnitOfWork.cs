@@ -4,6 +4,7 @@ using Domain.Data;
 using Core.Data;
 using Core.Repositories;
 using Core.Interface;
+using Core.Interface.IRepository;
 
 namespace Core.UnitOfWork;
 
