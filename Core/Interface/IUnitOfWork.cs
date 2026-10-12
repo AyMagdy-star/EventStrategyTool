@@ -1,6 +1,4 @@
-using Core.Repositories.Interface;
-
-namespace Core.UnitOfWork;
+namespace Core.Interface;
 
 public interface IUnitOfWork : IAsyncDisposable
 {

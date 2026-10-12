@@ -1,9 +1,9 @@
-using Core.Repositories.Interface;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 using Domain.Data;
 using Core.Data;
 using Core.Repositories;
+using Core.Interface;
 
 namespace Core.UnitOfWork;
 
@@ -69,14 +69,14 @@ internal sealed class UnitOfWork : IUnitOfWork
 
     public async ValueTask DisposeAsync()
     {
-        if (_transaction is not null) await _transaction.DisposeAsync(); // uncommitted = rolled back
+        if (_transaction is not null) await _transaction.DisposeAsync(); 
         await _context.DisposeAsync();
     }
 }
 
 internal sealed class UnitOfWorkFactory : IUnitOfWorkFactory
 {
-    private readonly IDbContextFactory<EventStrategyToolDbContext> _contextFactory; // TODO: real DbContext name
+    private readonly IDbContextFactory<EventStrategyToolDbContext> _contextFactory; 
     private readonly RepositoryRegistry _registry;
 
     public UnitOfWorkFactory(IDbContextFactory<EventStrategyToolDbContext> contextFactory, RepositoryRegistry registry)

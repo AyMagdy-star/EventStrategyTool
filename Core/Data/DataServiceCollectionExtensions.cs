@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Domain.Data;
 using Core.UnitOfWork;
+using Core.Interface;
 
 namespace Core.Data;
 
