@@ -4,4 +4,5 @@
   <Project Path="Domain/Domain.csproj" />
   <Project Path="EventStrategyTool/EventStrategyTool.csproj" />
   <Project Path="EventStrategyToolAPI/EventStrategyToolAPI.csproj" />
+  <Project Path="Shared/Shared.csproj" Id="ae7e0acd-0b28-4ba4-9803-ce5406ced750" />
 </Solution>
