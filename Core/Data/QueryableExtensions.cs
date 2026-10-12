@@ -1,5 +1,5 @@
 using Microsoft.EntityFrameworkCore;
-using EventStrategyTool.Shared.Results;
+using Shared.Results;
 
 namespace Core.Data;
 
