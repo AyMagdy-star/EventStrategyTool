@@ -1,4 +1,4 @@
-namespace Shared.Dtos.Events;
+namespace Shared.DTOs.Events;
 
 public sealed record StatusHistoryDto(
     string Id,

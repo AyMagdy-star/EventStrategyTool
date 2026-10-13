@@ -1,4 +1,4 @@
-namespace Shared.Dtos.Lookups;
+namespace Shared.DTOs.Lookups;
 
 public sealed record LookupItemDto(
     string Id,

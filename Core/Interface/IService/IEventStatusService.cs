@@ -1,4 +1,4 @@
-using Shared.Dtos.Events;
+using Shared.DTOs.Events;
 using Shared.Results;
 
 namespace Core.Status;

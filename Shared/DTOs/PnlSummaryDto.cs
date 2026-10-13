@@ -1,4 +1,4 @@
-namespace Shared.Dtos.Pnl;
+namespace Shared.DTOs.Pnl;
 
 public enum PnlBasis { Expected, Actual }
 

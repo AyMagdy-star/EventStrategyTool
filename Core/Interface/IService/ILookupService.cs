@@ -1,4 +1,4 @@
-using Shared.Dtos.Lookups;
+using Shared.DTOs.Lookups;
 using Shared.Results;
 
 namespace Core.Lookups;
