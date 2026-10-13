@@ -15,10 +15,6 @@ public class ScoringConfigurationService : IScoringConfigurationService
         _unitOfWorkFactory = unitOfWorkFactory;
     }
 
-    // =========================================================
-    // Factors and KPIs
-    // =========================================================
-
     public async Task<List<EvaluationFactorDto>> GetFactorsWithKpisAsync()
     {
         await using IUnitOfWork unitOfWork = _unitOfWorkFactory.Create();
@@ -65,7 +61,7 @@ public class ScoringConfigurationService : IScoringConfigurationService
 
         List<EvaluationFactor> factors = await factorRepository.ListAsync();
 
-        // All factors are saved together, otherwise the total is not really 100%
+       
         if (factors.Count != weights.Count)
         {
             errors.Add("Factors: send the weight of every factor together.");
@@ -105,7 +101,7 @@ public class ScoringConfigurationService : IScoringConfigurationService
         await using IUnitOfWork unitOfWork = _unitOfWorkFactory.Create();
         IRepository<Kpi> kpiRepository = unitOfWork.Repository<Kpi>();
 
-        // Only the KPIs of this factor
+
         List<Kpi> factorKpis = await kpiRepository.ListAsync(k => k.EvaluationFactorId == factorId);
 
         if (factorKpis.Count != weights.Count)
@@ -136,10 +132,6 @@ public class ScoringConfigurationService : IScoringConfigurationService
         return errors;
     }
 
-    // =========================================================
-    // Score bands
-    // =========================================================
-
     public async Task<List<BandingThresholdDto>> GetBandsAsync(string kpiId)
     {
         await using IUnitOfWork unitOfWork = _unitOfWorkFactory.Create();
@@ -154,8 +146,7 @@ public class ScoringConfigurationService : IScoringConfigurationService
         {
             BandingThresholdDto bandDto = GenericMapper.Map<BandingThreshold, BandingThresholdDto>(band);
 
-            // Score is a tinyint (byte) in the database and an int in the DTO,
-            // so the generic mapper skips it and we copy it here
+          
             bandDto.Score = Convert.ToInt32(band.Score);
 
             result.Add(bandDto);
@@ -183,7 +174,7 @@ public class ScoringConfigurationService : IScoringConfigurationService
             return errors;
         }
 
-        // The 5 bands of every banded KPI come from the seed script, so here we only update them
+      
         List<BandingThreshold> existingBands = await bandRepository.ListAsync(b => b.KpiId == kpiId);
 
         foreach (BandingThresholdDto item in bands)
@@ -208,10 +199,6 @@ public class ScoringConfigurationService : IScoringConfigurationService
         await unitOfWork.SaveChangesAsync();
         return errors;
     }
-
-    // =========================================================
-    // Helpers
-    // =========================================================
 
     private static EvaluationFactor? FindFactor(List<EvaluationFactor> factors, string id)
     {

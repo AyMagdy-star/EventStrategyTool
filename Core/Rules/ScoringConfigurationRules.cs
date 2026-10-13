@@ -114,4 +114,109 @@ public static class ScoringConfigurationRules
 
         return errors;
     }
+
+    // ---------- Questions and answers ----------
+
+    // What each input type is allowed to have:
+    //   DROPDOWN  -> exactly 5 active answers, scores 1 to 5, each score once
+    //   CHECKLIST -> at least 1 active item, items have no score
+    //   NUMBER / PERCENT -> no options at all
+    public static List<string> CheckOptions(string inputType, List<InputVariableOptionDto> options)
+    {
+        List<string> errors = new List<string>();
+
+        // Every option needs a text, whatever the type
+        foreach (InputVariableOptionDto option in options)
+        {
+            if (string.IsNullOrWhiteSpace(option.Description))
+            {
+                errors.Add("Options: every answer or item needs a description.");
+                break;
+            }
+        }
+
+        if (inputType == InputTypes.Dropdown)
+        {
+            CheckDropdownOptions(options, errors);
+        }
+        else if (inputType == InputTypes.Checklist)
+        {
+            CheckChecklistItems(options, errors);
+        }
+        else if (inputType == InputTypes.Number || inputType == InputTypes.Percent)
+        {
+            if (options.Count > 0)
+            {
+                errors.Add("Options: a typed number has no answers to choose from.");
+            }
+        }
+        else
+        {
+            errors.Add($"Options: input type '{inputType}' is not known.");
+        }
+
+        return errors;
+    }
+
+    private static void CheckDropdownOptions(List<InputVariableOptionDto> options, List<string> errors)
+    {
+        bool[] scoreSeen = new bool[6];
+        int activeCount = 0;
+
+        foreach (InputVariableOptionDto option in options)
+        {
+            if (!option.IsActive)
+            {
+                continue;
+            }
+
+            activeCount++;
+
+            if (option.Score == null || option.Score < 1 || option.Score > 5)
+            {
+                errors.Add("Options: every dropdown answer needs a score from 1 to 5.");
+                continue;
+            }
+
+            int score = option.Score.Value;
+            if (scoreSeen[score])
+            {
+                errors.Add($"Options: score {score} is used by more than one answer.");
+            }
+
+            scoreSeen[score] = true;
+        }
+
+        if (activeCount != 5)
+        {
+            errors.Add($"Options: a dropdown question needs exactly 5 active answers, it has {activeCount}.");
+        }
+    }
+
+    private static void CheckChecklistItems(List<InputVariableOptionDto> options, List<string> errors)
+    {
+        int activeCount = 0;
+
+        foreach (InputVariableOptionDto option in options)
+        {
+            if (option.Score != null)
+            {
+                errors.Add("Options: checklist items have no score.");
+                break;
+            }
+        }
+
+        foreach (InputVariableOptionDto option in options)
+        {
+            if (option.IsActive)
+            {
+                activeCount++;
+            }
+        }
+
+        if (activeCount == 0)
+        {
+            errors.Add("Options: a checklist needs at least one active item.");
+        }
+    }
 }
