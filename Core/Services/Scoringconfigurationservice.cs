@@ -15,6 +15,10 @@ public class ScoringConfigurationService : IScoringConfigurationService
         _unitOfWorkFactory = unitOfWorkFactory;
     }
 
+    // =========================================================
+    // Factors and KPIs
+    // =========================================================
+
     public async Task<List<EvaluationFactorDto>> GetFactorsWithKpisAsync()
     {
         await using IUnitOfWork unitOfWork = _unitOfWorkFactory.Create();
@@ -61,7 +65,7 @@ public class ScoringConfigurationService : IScoringConfigurationService
 
         List<EvaluationFactor> factors = await factorRepository.ListAsync();
 
-      
+        // All factors are saved together, otherwise the total is not really 100%
         if (factors.Count != weights.Count)
         {
             errors.Add("Factors: send the weight of every factor together.");
@@ -101,7 +105,7 @@ public class ScoringConfigurationService : IScoringConfigurationService
         await using IUnitOfWork unitOfWork = _unitOfWorkFactory.Create();
         IRepository<Kpi> kpiRepository = unitOfWork.Repository<Kpi>();
 
-        
+        // Only the KPIs of this factor
         List<Kpi> factorKpis = await kpiRepository.ListAsync(k => k.EvaluationFactorId == factorId);
 
         if (factorKpis.Count != weights.Count)
@@ -132,6 +136,83 @@ public class ScoringConfigurationService : IScoringConfigurationService
         return errors;
     }
 
+    // =========================================================
+    // Score bands
+    // =========================================================
+
+    public async Task<List<BandingThresholdDto>> GetBandsAsync(string kpiId)
+    {
+        await using IUnitOfWork unitOfWork = _unitOfWorkFactory.Create();
+        IRepository<BandingThreshold> bandRepository = unitOfWork.Repository<BandingThreshold>();
+
+        List<BandingThreshold> bands = await bandRepository.ListAsync(b => b.KpiId == kpiId);
+        bands.Sort((first, second) => Convert.ToInt32(first.Score).CompareTo(Convert.ToInt32(second.Score)));
+
+        List<BandingThresholdDto> result = new List<BandingThresholdDto>();
+
+        foreach (BandingThreshold band in bands)
+        {
+            BandingThresholdDto bandDto = GenericMapper.Map<BandingThreshold, BandingThresholdDto>(band);
+
+            // Score is a tinyint (byte) in the database and an int in the DTO,
+            // so the generic mapper skips it and we copy it here
+            bandDto.Score = Convert.ToInt32(band.Score);
+
+            result.Add(bandDto);
+        }
+
+        return result;
+    }
+
+    public async Task<List<string>> SaveBandsAsync(string kpiId, List<BandingThresholdDto> bands)
+    {
+        List<string> errors = ScoringConfigurationRules.CheckBands(bands);
+        if (errors.Count > 0)
+        {
+            return errors;
+        }
+
+        await using IUnitOfWork unitOfWork = _unitOfWorkFactory.Create();
+        IRepository<Kpi> kpiRepository = unitOfWork.Repository<Kpi>();
+        IRepository<BandingThreshold> bandRepository = unitOfWork.Repository<BandingThreshold>();
+
+        Kpi? kpi = await kpiRepository.GetByIdAsync(kpiId);
+        if (kpi == null)
+        {
+            errors.Add($"Bands: KPI {kpiId} was not found.");
+            return errors;
+        }
+
+        // The 5 bands of every banded KPI come from the seed script, so here we only update them
+        List<BandingThreshold> existingBands = await bandRepository.ListAsync(b => b.KpiId == kpiId);
+
+        foreach (BandingThresholdDto item in bands)
+        {
+            BandingThreshold? band = FindBandByScore(existingBands, item.Score);
+            if (band == null)
+            {
+                errors.Add($"Bands: score {item.Score} does not exist for this KPI. Check the seed data.");
+                continue;
+            }
+
+            band.MinValue = item.MinValue;
+            band.MaxValue = item.MaxValue;
+            bandRepository.Update(band);
+        }
+
+        if (errors.Count > 0)
+        {
+            return errors;
+        }
+
+        await unitOfWork.SaveChangesAsync();
+        return errors;
+    }
+
+    // =========================================================
+    // Helpers
+    // =========================================================
+
     private static EvaluationFactor? FindFactor(List<EvaluationFactor> factors, string id)
     {
         foreach (EvaluationFactor factor in factors)
@@ -152,6 +233,19 @@ public class ScoringConfigurationService : IScoringConfigurationService
             if (kpi.Id == id)
             {
                 return kpi;
+            }
+        }
+
+        return null;
+    }
+
+    private static BandingThreshold? FindBandByScore(List<BandingThreshold> bands, int score)
+    {
+        foreach (BandingThreshold band in bands)
+        {
+            if (Convert.ToInt32(band.Score) == score)
+            {
+                return band;
             }
         }
 
