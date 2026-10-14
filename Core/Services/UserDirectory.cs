@@ -1,6 +1,6 @@
 using Core.Interface;
 using Core.Interface.IService;
-using Domain.Entities; // TODO: confirm namespace of the scaffolded User entity
+using Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Shared.DTOs.Users;
 

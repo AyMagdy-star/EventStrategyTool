@@ -16,8 +16,8 @@ internal static class EventRules
         var errors = new List<string>();
 
         Required(errors, d.Name, 150, "Name");
-        Required(errors, d.EventTypeId, 10, "Event type");
-        Required(errors, d.PrimaryObjectiveId, 10, "Primary objective");
+        Required(errors, d.EventTypeId, 21, "Event type");
+        Required(errors, d.PrimaryObjectiveId, 21, "Primary objective");
         if (d.EventDate == default) errors.Add("Event date is required.");
 
         MaxLength(errors, d.Location, 100, "Location");

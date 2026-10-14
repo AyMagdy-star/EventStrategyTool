@@ -1,16 +1,16 @@
 using Core.Interface.IService;
 using Core.Services;
 using Microsoft.Extensions.DependencyInjection;
+using Core.Lookups;
+using Core.Events;
 
 namespace Core.Extensions;
 
 public static class ServiceCollectionExtensions
 {
-    /// <summary>
     /// Registers every Core service. One line per service, so merges between Dev A and Dev B stay trivial.
     /// Call AddDataInfrastructure(...) (Core/Data) first.
     /// Scoped, because EventService and the API security classes use the per-request ICurrentUser.
-    /// </summary>
     public static IServiceCollection AddCoreServices(this IServiceCollection services)
     {
         // W1 reference data and users
