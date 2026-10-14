@@ -1,15 +1,10 @@
 ﻿using Shared.DTOs.ScoringConfiguration;
 
 namespace Core.ScoringConfiguration;
-
-// Plain rules with no database access, so they are easy to read and reuse
 public static class ScoringConfigurationRules
 {
-    // Small margin so 0.333333 x 3 still counts as 100%
+  
     private const decimal AllowedDifference = 0.0001m;
-
-    // ---------- Weights ----------
-
     public static List<string> CheckWeights(List<WeightUpdateDto> weights, string groupName)
     {
         List<string> errors = new List<string>();
@@ -40,12 +35,6 @@ public static class ScoringConfigurationRules
 
         return errors;
     }
-
-    // ---------- Score bands ----------
-
-    // A KPI needs exactly 5 bands (scores 1 to 5) that follow each other with no gaps:
-    // score 1 has no minimum, score 5 has no maximum,
-    // and each band ends exactly where the next one starts.
     public static List<string> CheckBands(List<BandingThresholdDto> bands)
     {
         List<string> errors = new List<string>();
@@ -56,7 +45,7 @@ public static class ScoringConfigurationRules
             return errors;
         }
 
-        // Put the bands in score order 1..5, and make sure each score appears once
+       
         BandingThresholdDto?[] bandsByScore = new BandingThresholdDto?[6];
         foreach (BandingThresholdDto band in bands)
         {
@@ -84,13 +73,13 @@ public static class ScoringConfigurationRules
         {
             BandingThresholdDto band = bandsByScore[score]!;
 
-            // Score 1 starts from nothing, every other score needs a minimum
+           
             if (score > 1 && band.MinValue == null)
             {
                 errors.Add($"Bands: score {score} needs a minimum value.");
             }
 
-            // Score 5 goes to infinity, every other score needs a maximum
+            
             if (score < 5 && band.MaxValue == null)
             {
                 errors.Add($"Bands: score {score} needs a maximum value.");
@@ -101,7 +90,7 @@ public static class ScoringConfigurationRules
                 errors.Add($"Bands: for score {score}, the minimum must be smaller than the maximum.");
             }
 
-            // No gap and no overlap: this band ends where the next one starts
+           
             if (score < 5)
             {
                 BandingThresholdDto nextBand = bandsByScore[score + 1]!;
@@ -114,18 +103,11 @@ public static class ScoringConfigurationRules
 
         return errors;
     }
-
-    // ---------- Questions and answers ----------
-
-    // What each input type is allowed to have:
-    //   DROPDOWN  -> exactly 5 active answers, scores 1 to 5, each score once
-    //   CHECKLIST -> at least 1 active item, items have no score
-    //   NUMBER / PERCENT -> no options at all
     public static List<string> CheckOptions(string inputType, List<InputVariableOptionDto> options)
     {
         List<string> errors = new List<string>();
 
-        // Every option needs a text, whatever the type
+      
         foreach (InputVariableOptionDto option in options)
         {
             if (string.IsNullOrWhiteSpace(option.Description))
@@ -218,5 +200,79 @@ public static class ScoringConfigurationRules
         {
             errors.Add("Options: a checklist needs at least one active item.");
         }
+    }
+
+    
+    public static List<string> CheckObjective(ObjectiveDto objective)
+    {
+        List<string> errors = new List<string>();
+
+        if (string.IsNullOrWhiteSpace(objective.Name))
+        {
+            errors.Add("Objective: the name is required.");
+        }
+        else if (objective.Name.Trim().Length > 100)
+        {
+            errors.Add("Objective: the name can be 100 characters at most.");
+        }
+
+        if (objective.Explanation != null && objective.Explanation.Length > 2000)
+        {
+            errors.Add("Objective: the explanation can be 2000 characters at most.");
+        }
+
+        if (objective.Rationale != null && objective.Rationale.Length > 2000)
+        {
+            errors.Add("Objective: the rationale can be 2000 characters at most.");
+        }
+
+        if (objective.EmployeeAttendancePct < 0m || objective.EmployeeAttendancePct > 1m)
+        {
+            errors.Add("Objective: employee attendance must be between 0% and 100%.");
+        }
+
+        if (objective.DirectInvitesPct < 0m || objective.DirectInvitesPct > 1m)
+        {
+            errors.Add("Objective: direct invites must be between 0% and 100%.");
+        }
+
+        if (objective.TicketsPerEmployee < 0)
+        {
+            errors.Add("Objective: tickets per employee cannot be negative.");
+        }
+
+       
+        decimal freePlaces = objective.EmployeeAttendancePct + objective.DirectInvitesPct;
+        if (freePlaces > 1m)
+        {
+            decimal freePercent = Math.Round(freePlaces * 100m, 2);
+            errors.Add($"Objective: employees and direct invites add up to {freePercent}% of the attendees, it cannot be more than 100%.");
+        }
+
+        return errors;
+    }
+
+    public static List<string> CheckBenchmarks(List<ObjectiveBenchmarkDto> benchmarks)
+    {
+        List<string> errors = new List<string>();
+
+        foreach (ObjectiveBenchmarkDto benchmark in benchmarks)
+        {
+            if (string.IsNullOrWhiteSpace(benchmark.DisplayText))
+            {
+                errors.Add($"Benchmarks: '{benchmark.MetricName}' needs a display text.");
+            }
+            else if (benchmark.DisplayText.Trim().Length > 100)
+            {
+                errors.Add($"Benchmarks: the text of '{benchmark.MetricName}' can be 100 characters at most.");
+            }
+
+            if (benchmark.MinValue != null && benchmark.MaxValue != null && benchmark.MinValue > benchmark.MaxValue)
+            {
+                errors.Add($"Benchmarks: for '{benchmark.MetricName}', the minimum cannot be bigger than the maximum.");
+            }
+        }
+
+        return errors;
     }
 }

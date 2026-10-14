@@ -4,7 +4,6 @@ namespace Core.ScoringConfiguration;
 
 public interface IScoringConfigurationService
 {
-  
     Task<List<EvaluationFactorDto>> GetFactorsWithKpisAsync();
     Task<List<string>> SaveFactorWeightsAsync(List<WeightUpdateDto> weights);
     Task<List<string>> SaveKpiWeightsAsync(string factorId, List<WeightUpdateDto> weights);
@@ -14,4 +13,8 @@ public interface IScoringConfigurationService
     Task<InputVariableDto?> GetInputVariableAsync(string inputVariableId);
     Task<List<string>> SaveOptionsAsync(string inputVariableId, List<InputVariableOptionDto> options);
     Task<List<string>> SaveGovernanceWeightsAsync(List<WeightUpdateDto> weights);
+    Task<List<ObjectiveDto>> GetObjectivesAsync();
+    Task<ObjectiveDto?> GetObjectiveAsync(string objectiveId);
+    Task<List<string>> SaveObjectiveAsync(ObjectiveDto objective);
+    Task<List<string>> SaveBenchmarksAsync(string objectiveId, List<ObjectiveBenchmarkDto> benchmarks);
 }

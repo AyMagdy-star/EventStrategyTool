@@ -57,7 +57,7 @@ public sealed record EventDto(
     IReadOnlyList<EventResponsibilityDto> Responsibilities,
     IReadOnlyList<EventRiskUpsideDto> RisksAndUpsides);
 
-/// <summary>Row of the event list; no child data.</summary>
+
 public sealed record EventSummaryDto(
     string Id,
     string Name,

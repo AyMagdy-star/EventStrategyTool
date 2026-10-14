@@ -101,7 +101,7 @@ public class ScoringConfigurationService : IScoringConfigurationService
         await using IUnitOfWork unitOfWork = _unitOfWorkFactory.Create();
         IRepository<Kpi> kpiRepository = unitOfWork.Repository<Kpi>();
 
-
+       
         List<Kpi> factorKpis = await kpiRepository.ListAsync(k => k.EvaluationFactorId == factorId);
 
         if (factorKpis.Count != weights.Count)
@@ -132,6 +132,7 @@ public class ScoringConfigurationService : IScoringConfigurationService
         return errors;
     }
 
+   
     public async Task<List<BandingThresholdDto>> GetBandsAsync(string kpiId)
     {
         await using IUnitOfWork unitOfWork = _unitOfWorkFactory.Create();
@@ -146,7 +147,6 @@ public class ScoringConfigurationService : IScoringConfigurationService
         {
             BandingThresholdDto bandDto = GenericMapper.Map<BandingThreshold, BandingThresholdDto>(band);
 
-          
             bandDto.Score = Convert.ToInt32(band.Score);
 
             result.Add(bandDto);
@@ -200,6 +200,290 @@ public class ScoringConfigurationService : IScoringConfigurationService
         return errors;
     }
 
+    public async Task<List<InputVariableDto>> GetInputVariablesAsync()
+    {
+        await using IUnitOfWork unitOfWork = _unitOfWorkFactory.Create();
+
+        IRepository<InputVariable> variableRepository = unitOfWork.Repository<InputVariable>();
+        IRepository<InputVariableOption> optionRepository = unitOfWork.Repository<InputVariableOption>();
+
+        List<InputVariable> variables = await variableRepository.ListAsync();
+        List<InputVariableOption> options = await optionRepository.ListAsync();
+
+        variables.Sort((first, second) => first.SortOrder.CompareTo(second.SortOrder));
+        options.Sort((first, second) => first.SortOrder.CompareTo(second.SortOrder));
+
+        List<InputVariableDto> result = new List<InputVariableDto>();
+
+        foreach (InputVariable variable in variables)
+        {
+            InputVariableDto variableDto = GenericMapper.Map<InputVariable, InputVariableDto>(variable);
+
+            foreach (InputVariableOption option in options)
+            {
+                if (option.InputVariableId == variable.Id)
+                {
+                    variableDto.Options.Add(ToOptionDto(option));
+                }
+            }
+
+            result.Add(variableDto);
+        }
+
+        return result;
+    }
+
+    public async Task<InputVariableDto?> GetInputVariableAsync(string inputVariableId)
+    {
+        await using IUnitOfWork unitOfWork = _unitOfWorkFactory.Create();
+
+        IRepository<InputVariable> variableRepository = unitOfWork.Repository<InputVariable>();
+        IRepository<InputVariableOption> optionRepository = unitOfWork.Repository<InputVariableOption>();
+
+        InputVariable? variable = await variableRepository.GetByIdAsync(inputVariableId);
+        if (variable == null)
+        {
+            return null;
+        }
+
+        List<InputVariableOption> options = await optionRepository.ListAsync(o => o.InputVariableId == inputVariableId);
+        options.Sort((first, second) => first.SortOrder.CompareTo(second.SortOrder));
+
+        InputVariableDto variableDto = GenericMapper.Map<InputVariable, InputVariableDto>(variable);
+
+        foreach (InputVariableOption option in options)
+        {
+            variableDto.Options.Add(ToOptionDto(option));
+        }
+
+        return variableDto;
+    }
+
+    public async Task<List<string>> SaveOptionsAsync(string inputVariableId, List<InputVariableOptionDto> options)
+    {
+        List<string> errors = new List<string>();
+
+        await using IUnitOfWork unitOfWork = _unitOfWorkFactory.Create();
+        IRepository<InputVariable> variableRepository = unitOfWork.Repository<InputVariable>();
+        IRepository<InputVariableOption> optionRepository = unitOfWork.Repository<InputVariableOption>();
+
+        InputVariable? variable = await variableRepository.GetByIdAsync(inputVariableId);
+        if (variable == null)
+        {
+            errors.Add($"Options: input {inputVariableId} was not found.");
+            return errors;
+        }
+
+        
+        errors = ScoringConfigurationRules.CheckOptions(variable.InputType, options);
+        if (errors.Count > 0)
+        {
+            return errors;
+        }
+
+        
+        List<InputVariableOption> existingOptions = await optionRepository.ListAsync(o => o.InputVariableId == inputVariableId);
+
+        if (existingOptions.Count != options.Count)
+        {
+            errors.Add("Options: send every answer or item of this input together.");
+            return errors;
+        }
+
+        foreach (InputVariableOptionDto item in options)
+        {
+            InputVariableOption? option = FindOption(existingOptions, item.Id);
+            if (option == null)
+            {
+                errors.Add($"Options: {item.Id} does not belong to this input.");
+                continue;
+            }
+
+            option.Description = item.Description.Trim();
+            option.SortOrder = item.SortOrder;
+            option.IsActive = item.IsActive;
+            optionRepository.Update(option);
+        }
+
+        if (errors.Count > 0)
+        {
+            return errors;
+        }
+
+        await unitOfWork.SaveChangesAsync();
+        return errors;
+    }
+
+    public async Task<List<string>> SaveGovernanceWeightsAsync(List<WeightUpdateDto> weights)
+    {
+        List<string> errors = ScoringConfigurationRules.CheckWeights(weights, "Governance");
+        if (errors.Count > 0)
+        {
+            return errors;
+        }
+
+        await using IUnitOfWork unitOfWork = _unitOfWorkFactory.Create();
+        IRepository<InputVariable> variableRepository = unitOfWork.Repository<InputVariable>();
+
+        List<InputVariable> governanceVariables = await variableRepository.ListAsync(v => v.IsGovernance);
+
+       
+        if (governanceVariables.Count != weights.Count)
+        {
+            errors.Add("Governance: send the weight of every governance question together.");
+            return errors;
+        }
+
+        foreach (WeightUpdateDto item in weights)
+        {
+            InputVariable? variable = FindVariable(governanceVariables, item.Id);
+            if (variable == null)
+            {
+                errors.Add($"Governance: {item.Id} is not a governance question.");
+                continue;
+            }
+
+            variable.GovernanceWeight = item.Weight;
+            variableRepository.Update(variable);
+        }
+
+        if (errors.Count > 0)
+        {
+            return errors;
+        }
+
+        await unitOfWork.SaveChangesAsync();
+        return errors;
+    }
+
+    public async Task<List<ObjectiveDto>> GetObjectivesAsync()
+    {
+        await using IUnitOfWork unitOfWork = _unitOfWorkFactory.Create();
+        IRepository<Objective> objectiveRepository = unitOfWork.Repository<Objective>();
+
+        List<Objective> objectives = await objectiveRepository.ListAsync();
+
+      
+        objectives.Sort((first, second) => string.CompareOrdinal(first.Id, second.Id));
+
+        List<ObjectiveDto> result = GenericMapper.MapList<Objective, ObjectiveDto>(objectives);
+        return result;
+    }
+
+    public async Task<ObjectiveDto?> GetObjectiveAsync(string objectiveId)
+    {
+        await using IUnitOfWork unitOfWork = _unitOfWorkFactory.Create();
+
+        IRepository<Objective> objectiveRepository = unitOfWork.Repository<Objective>();
+        IRepository<ObjectiveBenchMark> benchmarkRepository = unitOfWork.Repository<ObjectiveBenchMark>();
+
+        Objective? objective = await objectiveRepository.GetByIdAsync(objectiveId);
+        if (objective == null)
+        {
+            return null;
+        }
+
+        List<ObjectiveBenchMark> benchmarks = await benchmarkRepository.ListAsync(b => b.ObjectiveId == objectiveId);
+        benchmarks.Sort((first, second) => first.SortOrder.CompareTo(second.SortOrder));
+
+        ObjectiveDto objectiveDto = GenericMapper.Map<Objective, ObjectiveDto>(objective);
+        objectiveDto.Benchmarks = GenericMapper.MapList<ObjectiveBenchMark, ObjectiveBenchmarkDto>(benchmarks);
+
+        return objectiveDto;
+    }
+
+    public async Task<List<string>> SaveObjectiveAsync(ObjectiveDto objective)
+    {
+        List<string> errors = ScoringConfigurationRules.CheckObjective(objective);
+        if (errors.Count > 0)
+        {
+            return errors;
+        }
+
+        await using IUnitOfWork unitOfWork = _unitOfWorkFactory.Create();
+        IRepository<Objective> objectiveRepository = unitOfWork.Repository<Objective>();
+
+        Objective? existing = await objectiveRepository.GetByIdAsync(objective.Id);
+        if (existing == null)
+        {
+            errors.Add($"Objective: {objective.Id} was not found.");
+            return errors;
+        }
+
+        
+        string newName = objective.Name.Trim();
+        bool nameTaken = await objectiveRepository.AnyAsync(o => o.Name == newName && o.Id != objective.Id);
+        if (nameTaken)
+        {
+            errors.Add($"Objective: another objective is already called '{newName}'.");
+            return errors;
+        }
+
+       
+        existing.Name = newName;
+        existing.Explanation = objective.Explanation;
+        existing.Rationale = objective.Rationale;
+        existing.EmployeeAttendancePct = objective.EmployeeAttendancePct;
+        existing.TicketsPerEmployee = objective.TicketsPerEmployee;
+        existing.DirectInvitesPct = objective.DirectInvitesPct;
+        objectiveRepository.Update(existing);
+
+        await unitOfWork.SaveChangesAsync();
+        return errors;
+    }
+
+    public async Task<List<string>> SaveBenchmarksAsync(string objectiveId, List<ObjectiveBenchmarkDto> benchmarks)
+    {
+        List<string> errors = ScoringConfigurationRules.CheckBenchmarks(benchmarks);
+        if (errors.Count > 0)
+        {
+            return errors;
+        }
+
+        await using IUnitOfWork unitOfWork = _unitOfWorkFactory.Create();
+        IRepository<ObjectiveBenchMark> benchmarkRepository = unitOfWork.Repository<ObjectiveBenchMark>();
+
+     
+        List<ObjectiveBenchMark> existingBenchmarks = await benchmarkRepository.ListAsync(b => b.ObjectiveId == objectiveId);
+
+        foreach (ObjectiveBenchmarkDto item in benchmarks)
+        {
+            ObjectiveBenchMark? benchmark = FindBenchmark(existingBenchmarks, item.Id);
+            if (benchmark == null)
+            {
+                errors.Add($"Benchmarks: {item.Id} does not belong to this objective.");
+                continue;
+            }
+            benchmark.DisplayText = item.DisplayText.Trim();
+            benchmark.MinValue = item.MinValue;
+            benchmark.MaxValue = item.MaxValue;
+            benchmarkRepository.Update(benchmark);
+        }
+
+        if (errors.Count > 0)
+        {
+            return errors;
+        }
+
+        await unitOfWork.SaveChangesAsync();
+        return errors;
+    }
+    private static InputVariableOptionDto ToOptionDto(InputVariableOption option)
+    {
+        InputVariableOptionDto optionDto = GenericMapper.Map<InputVariableOption, InputVariableOptionDto>(option);
+
+        if (option.Score != null)
+        {
+            optionDto.Score = option.Score.Value;
+        }
+        else
+        {
+            optionDto.Score = null;
+        }
+
+        return optionDto;
+    }
+
     private static EvaluationFactor? FindFactor(List<EvaluationFactor> factors, string id)
     {
         foreach (EvaluationFactor factor in factors)
@@ -233,6 +517,45 @@ public class ScoringConfigurationService : IScoringConfigurationService
             if (Convert.ToInt32(band.Score) == score)
             {
                 return band;
+            }
+        }
+
+        return null;
+    }
+
+    private static InputVariable? FindVariable(List<InputVariable> variables, string id)
+    {
+        foreach (InputVariable variable in variables)
+        {
+            if (variable.Id == id)
+            {
+                return variable;
+            }
+        }
+
+        return null;
+    }
+
+    private static InputVariableOption? FindOption(List<InputVariableOption> options, string id)
+    {
+        foreach (InputVariableOption option in options)
+        {
+            if (option.Id == id)
+            {
+                return option;
+            }
+        }
+
+        return null;
+    }
+
+    private static ObjectiveBenchMark? FindBenchmark(List<ObjectiveBenchMark> benchmarks, string id)
+    {
+        foreach (ObjectiveBenchMark benchmark in benchmarks)
+        {
+            if (benchmark.Id == id)
+            {
+                return benchmark;
             }
         }
 
