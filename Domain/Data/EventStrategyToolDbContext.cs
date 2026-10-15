@@ -100,9 +100,7 @@ public partial class EventStrategyToolDbContext : DbContext
 
             entity.HasIndex(e => e.FiscalYear, "UQ_Annual_Budget_Year").IsUnique();
 
-            entity.Property(e => e.Id)
-                .HasMaxLength(10)
-                .HasDefaultValueSql("(N'ABG'+right(N'0000000'+CONVERT([nvarchar](10),NEXT VALUE FOR [dbo].[seq_AnnualBudget]),(7)))", "DF_Annual_Budget_Id");
+            entity.Property(e => e.Id).HasMaxLength(21);
             entity.Property(e => e.BudgetAmount).HasColumnType("decimal(18, 2)");
             entity.Property(e => e.Currency)
                 .HasMaxLength(3)
@@ -115,15 +113,13 @@ public partial class EventStrategyToolDbContext : DbContext
         {
             entity.ToTable("Approval");
 
-            entity.Property(e => e.Id)
-                .HasMaxLength(10)
-                .HasDefaultValueSql("(N'APR'+right(N'0000000'+CONVERT([nvarchar](10),NEXT VALUE FOR [dbo].[seq_Approval]),(7)))", "DF_Approval_Id");
-            entity.Property(e => e.ApproverRoleId).HasMaxLength(10);
-            entity.Property(e => e.ApproverUserId).HasMaxLength(10);
-            entity.Property(e => e.AssessmentId).HasMaxLength(10);
-            entity.Property(e => e.DecisionOutcomeId).HasMaxLength(10);
+            entity.Property(e => e.Id).HasMaxLength(21);
+            entity.Property(e => e.ApproverRoleId).HasMaxLength(21);
+            entity.Property(e => e.ApproverUserId).HasMaxLength(21);
+            entity.Property(e => e.AssessmentId).HasMaxLength(21);
+            entity.Property(e => e.DecisionOutcomeId).HasMaxLength(21);
             entity.Property(e => e.DecisionSummary).HasMaxLength(2000);
-            entity.Property(e => e.EventId).HasMaxLength(10);
+            entity.Property(e => e.EventId).HasMaxLength(21);
             entity.Property(e => e.OverrideReason).HasMaxLength(500);
             entity.Property(e => e.SignedAt).HasDefaultValueSql("(sysutcdatetime())", "DF_Approval_SignedAt");
 
@@ -159,18 +155,16 @@ public partial class EventStrategyToolDbContext : DbContext
 
             entity.HasIndex(e => new { e.EventId, e.Phase }, "UQ_Assessment_Event_Phase").IsUnique();
 
-            entity.Property(e => e.Id)
-                .HasMaxLength(10)
-                .HasDefaultValueSql("(N'ASM'+right(N'0000000'+CONVERT([nvarchar](10),NEXT VALUE FOR [dbo].[seq_Assessment]),(7)))", "DF_Assessment_Id");
-            entity.Property(e => e.EventId).HasMaxLength(10);
+            entity.Property(e => e.Id).HasMaxLength(21);
+            entity.Property(e => e.EventId).HasMaxLength(21);
             entity.Property(e => e.Phase)
                 .HasMaxLength(10)
                 .HasDefaultValue("PRE", "DF_Assessment_Phase");
-            entity.Property(e => e.RecommendedOutcomeId).HasMaxLength(10);
+            entity.Property(e => e.RecommendedOutcomeId).HasMaxLength(21);
             entity.Property(e => e.RoiInclMarketing).HasColumnType("decimal(18, 6)");
             entity.Property(e => e.RoiPure).HasColumnType("decimal(18, 6)");
             entity.Property(e => e.ScalabilityScore).HasColumnType("decimal(9, 4)");
-            entity.Property(e => e.SubmittedByUserId).HasMaxLength(10);
+            entity.Property(e => e.SubmittedByUserId).HasMaxLength(21);
             entity.Property(e => e.TotalScore).HasColumnType("decimal(9, 4)");
 
             entity.HasOne(d => d.Event).WithMany(p => p.Assessments)
@@ -193,12 +187,10 @@ public partial class EventStrategyToolDbContext : DbContext
 
             entity.HasIndex(e => new { e.AssessmentId, e.EvaluationFactorId }, "UQ_AssessmentFactorResult").IsUnique();
 
-            entity.Property(e => e.Id)
-                .HasMaxLength(10)
-                .HasDefaultValueSql("(N'AFR'+right(N'0000000'+CONVERT([nvarchar](10),NEXT VALUE FOR [dbo].[seq_AssessmentFactorResult]),(7)))", "DF_AssessmentFactorResult_Id");
-            entity.Property(e => e.AssessmentId).HasMaxLength(10);
+            entity.Property(e => e.Id).HasMaxLength(21);
+            entity.Property(e => e.AssessmentId).HasMaxLength(21);
             entity.Property(e => e.Comment).HasMaxLength(500);
-            entity.Property(e => e.EvaluationFactorId).HasMaxLength(10);
+            entity.Property(e => e.EvaluationFactorId).HasMaxLength(21);
             entity.Property(e => e.Score).HasColumnType("decimal(9, 4)");
             entity.Property(e => e.Weight).HasColumnType("decimal(9, 6)");
             entity.Property(e => e.WeightedScore).HasColumnType("decimal(9, 4)");
@@ -220,12 +212,10 @@ public partial class EventStrategyToolDbContext : DbContext
 
             entity.HasIndex(e => new { e.AssessmentId, e.InputVariableId, e.InputVariableOptionId }, "UX_AssessmentInputAnswer").IsUnique();
 
-            entity.Property(e => e.Id)
-                .HasMaxLength(10)
-                .HasDefaultValueSql("(N'AIA'+right(N'0000000'+CONVERT([nvarchar](10),NEXT VALUE FOR [dbo].[seq_AssessmentInputAnswer]),(7)))", "DF_AssessmentInputAnswer_Id");
-            entity.Property(e => e.AssessmentId).HasMaxLength(10);
-            entity.Property(e => e.InputVariableId).HasMaxLength(10);
-            entity.Property(e => e.InputVariableOptionId).HasMaxLength(10);
+            entity.Property(e => e.Id).HasMaxLength(21);
+            entity.Property(e => e.AssessmentId).HasMaxLength(21);
+            entity.Property(e => e.InputVariableId).HasMaxLength(21);
+            entity.Property(e => e.InputVariableOptionId).HasMaxLength(21);
             entity.Property(e => e.NumberValue).HasColumnType("decimal(18, 6)");
             entity.Property(e => e.OtherText).HasMaxLength(400);
 
@@ -251,13 +241,11 @@ public partial class EventStrategyToolDbContext : DbContext
 
             entity.HasIndex(e => new { e.AssessmentId, e.KpiId }, "UQ_AssessmentKpiValue_Assessment_Kpi").IsUnique();
 
-            entity.Property(e => e.Id)
-                .HasMaxLength(10)
-                .HasDefaultValueSql("(N'AKV'+right(N'0000000'+CONVERT([nvarchar](10),NEXT VALUE FOR [dbo].[seq_AssessmentKpiValue]),(7)))", "DF_AssessmentKpiValue_Id");
-            entity.Property(e => e.AssessmentId).HasMaxLength(10);
+            entity.Property(e => e.Id).HasMaxLength(21);
+            entity.Property(e => e.AssessmentId).HasMaxLength(21);
             entity.Property(e => e.Comment).HasMaxLength(500);
             entity.Property(e => e.InputValue).HasColumnType("decimal(18, 6)");
-            entity.Property(e => e.KpiId).HasMaxLength(10);
+            entity.Property(e => e.KpiId).HasMaxLength(21);
             entity.Property(e => e.Score).HasColumnType("decimal(9, 4)");
             entity.Property(e => e.WeightedScore).HasColumnType("decimal(9, 4)");
 
@@ -278,10 +266,8 @@ public partial class EventStrategyToolDbContext : DbContext
 
             entity.HasIndex(e => new { e.KpiId, e.Score }, "UQ_Banding_Thresholds_Kpi_Score").IsUnique();
 
-            entity.Property(e => e.Id)
-                .HasMaxLength(10)
-                .HasDefaultValueSql("(N'BND'+right(N'0000000'+CONVERT([nvarchar](10),NEXT VALUE FOR [dbo].[seq_Banding_Thresholds]),(7)))", "DF_Banding_Thresholds_Id");
-            entity.Property(e => e.KpiId).HasMaxLength(10);
+            entity.Property(e => e.Id).HasMaxLength(21);
+            entity.Property(e => e.KpiId).HasMaxLength(21);
             entity.Property(e => e.MaxValue).HasColumnType("decimal(18, 6)");
             entity.Property(e => e.MinValue).HasColumnType("decimal(18, 6)");
 
@@ -297,9 +283,7 @@ public partial class EventStrategyToolDbContext : DbContext
 
             entity.HasIndex(e => e.Name, "UQ_ComparisonMetric_Name").IsUnique();
 
-            entity.Property(e => e.Id)
-                .HasMaxLength(10)
-                .HasDefaultValueSql("(N'CMT'+right(N'0000000'+CONVERT([nvarchar](10),NEXT VALUE FOR [dbo].[seq_ComparisonMetric]),(7)))", "DF_ComparisonMetric_Id");
+            entity.Property(e => e.Id).HasMaxLength(21);
             entity.Property(e => e.IsActive).HasDefaultValue(true, "DF_ComparisonMetric_IsActive");
             entity.Property(e => e.Name).HasMaxLength(100);
             entity.Property(e => e.TolerancePct)
@@ -314,9 +298,7 @@ public partial class EventStrategyToolDbContext : DbContext
 
             entity.HasIndex(e => e.Name, "UQ_DecisionOutcome_Name").IsUnique();
 
-            entity.Property(e => e.Id)
-                .HasMaxLength(10)
-                .HasDefaultValueSql("(N'DEC'+right(N'0000000'+CONVERT([nvarchar](10),NEXT VALUE FOR [dbo].[seq_DecisionOutcome]),(7)))", "DF_DecisionOutcome_Id");
+            entity.Property(e => e.Id).HasMaxLength(21);
             entity.Property(e => e.Name).HasMaxLength(50);
         });
 
@@ -326,9 +308,7 @@ public partial class EventStrategyToolDbContext : DbContext
 
             entity.HasIndex(e => e.Name, "UQ_Department_Name").IsUnique();
 
-            entity.Property(e => e.Id)
-                .HasMaxLength(10)
-                .HasDefaultValueSql("(N'DEP'+right(N'0000000'+CONVERT([nvarchar](10),NEXT VALUE FOR [dbo].[seq_Department]),(7)))", "DF_Department_Id");
+            entity.Property(e => e.Id).HasMaxLength(21);
             entity.Property(e => e.IsActive).HasDefaultValue(true, "DF_Department_IsActive");
             entity.Property(e => e.Name).HasMaxLength(100);
         });
@@ -337,14 +317,12 @@ public partial class EventStrategyToolDbContext : DbContext
         {
             entity.HasIndex(e => new { e.AssessmentId, e.KpiId, e.DepartmentId }, "UQ_DepartmentAlignments_Assessment_Kpi_Dept").IsUnique();
 
-            entity.Property(e => e.Id)
-                .HasMaxLength(10)
-                .HasDefaultValueSql("(N'DAL'+right(N'0000000'+CONVERT([nvarchar](10),NEXT VALUE FOR [dbo].[seq_DepartmentAlignments]),(7)))", "DF_DepartmentAlignments_Id");
-            entity.Property(e => e.AlignedByUserId).HasMaxLength(10);
-            entity.Property(e => e.AssessmentId).HasMaxLength(10);
+            entity.Property(e => e.Id).HasMaxLength(21);
+            entity.Property(e => e.AlignedByUserId).HasMaxLength(21);
+            entity.Property(e => e.AssessmentId).HasMaxLength(21);
             entity.Property(e => e.Comment).HasMaxLength(500);
-            entity.Property(e => e.DepartmentId).HasMaxLength(10);
-            entity.Property(e => e.KpiId).HasMaxLength(10);
+            entity.Property(e => e.DepartmentId).HasMaxLength(21);
+            entity.Property(e => e.KpiId).HasMaxLength(21);
 
             entity.HasOne(d => d.AlignedByUser).WithMany(p => p.DepartmentAlignments)
                 .HasForeignKey(d => d.AlignedByUserId)
@@ -370,18 +348,14 @@ public partial class EventStrategyToolDbContext : DbContext
         {
             entity.ToTable("Entertainment_Type");
 
-            entity.Property(e => e.Id)
-                .HasMaxLength(10)
-                .HasDefaultValueSql("(N'ENT'+right(N'0000000'+CONVERT([nvarchar](10),NEXT VALUE FOR [dbo].[seq_Entertainment_Type]),(7)))", "DF_Entertainment_Type_Id");
+            entity.Property(e => e.Id).HasMaxLength(21);
             entity.Property(e => e.EntertainmentTaxRate).HasColumnType("decimal(9, 6)");
             entity.Property(e => e.Name).HasMaxLength(100);
         });
 
         modelBuilder.Entity<EvaluationFactor>(entity =>
         {
-            entity.Property(e => e.Id)
-                .HasMaxLength(10)
-                .HasDefaultValueSql("(N'EFC'+right(N'0000000'+CONVERT([nvarchar](10),NEXT VALUE FOR [dbo].[seq_EvaluationFactors]),(7)))", "DF_EvaluationFactors_Id");
+            entity.Property(e => e.Id).HasMaxLength(21);
             entity.Property(e => e.Name).HasMaxLength(100);
             entity.Property(e => e.Weight).HasColumnType("decimal(9, 6)");
         });
@@ -390,26 +364,24 @@ public partial class EventStrategyToolDbContext : DbContext
         {
             entity.ToTable("Event");
 
-            entity.Property(e => e.Id)
-                .HasMaxLength(10)
-                .HasDefaultValueSql("(N'EVT'+right(N'0000000'+CONVERT([nvarchar](10),NEXT VALUE FOR [dbo].[seq_Event]),(7)))", "DF_Event_Id");
+            entity.Property(e => e.Id).HasMaxLength(21);
             entity.Property(e => e.AccessLevels).HasMaxLength(500);
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("(sysutcdatetime())", "DF_Event_CreatedAt");
-            entity.Property(e => e.CreatedByUserId).HasMaxLength(10);
-            entity.Property(e => e.EntertainmentTypeId).HasMaxLength(10);
-            entity.Property(e => e.EventOwnerUserId).HasMaxLength(10);
-            entity.Property(e => e.EventTypeId).HasMaxLength(10);
-            entity.Property(e => e.FundingSourceId).HasMaxLength(10);
-            entity.Property(e => e.GoverningEntityId).HasMaxLength(10);
-            entity.Property(e => e.InviteMethodId).HasMaxLength(10);
+            entity.Property(e => e.CreatedByUserId).HasMaxLength(21);
+            entity.Property(e => e.EntertainmentTypeId).HasMaxLength(21);
+            entity.Property(e => e.EventOwnerUserId).HasMaxLength(21);
+            entity.Property(e => e.EventTypeId).HasMaxLength(21);
+            entity.Property(e => e.FundingSourceId).HasMaxLength(21);
+            entity.Property(e => e.GoverningEntityId).HasMaxLength(21);
+            entity.Property(e => e.InviteMethodId).HasMaxLength(21);
             entity.Property(e => e.Location).HasMaxLength(100);
             entity.Property(e => e.Name).HasMaxLength(150);
-            entity.Property(e => e.PrimaryIcpId).HasMaxLength(10);
-            entity.Property(e => e.PrimaryObjectiveId).HasMaxLength(10);
-            entity.Property(e => e.SecondaryIcpId).HasMaxLength(10);
-            entity.Property(e => e.SecondaryObjectiveId).HasMaxLength(10);
+            entity.Property(e => e.PrimaryIcpId).HasMaxLength(21);
+            entity.Property(e => e.PrimaryObjectiveId).HasMaxLength(21);
+            entity.Property(e => e.SecondaryIcpId).HasMaxLength(21);
+            entity.Property(e => e.SecondaryObjectiveId).HasMaxLength(21);
             entity.Property(e => e.SpecialExperiences).HasMaxLength(500);
-            entity.Property(e => e.StatusId).HasMaxLength(10);
+            entity.Property(e => e.StatusId).HasMaxLength(21);
             entity.Property(e => e.TargetAudience).HasMaxLength(200);
             entity.Property(e => e.TicketTypes).HasMaxLength(500);
             entity.Property(e => e.Venue).HasMaxLength(200);
@@ -471,14 +443,12 @@ public partial class EventStrategyToolDbContext : DbContext
         {
             entity.ToTable("EventComment");
 
-            entity.Property(e => e.Id)
-                .HasMaxLength(10)
-                .HasDefaultValueSql("(N'ECO'+right(N'0000000'+CONVERT([nvarchar](10),NEXT VALUE FOR [dbo].[seq_EventComment]),(7)))", "DF_EventComment_Id");
+            entity.Property(e => e.Id).HasMaxLength(21);
             entity.Property(e => e.Comment).HasMaxLength(2000);
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("(sysutcdatetime())", "DF_EventComment_CreatedAt");
-            entity.Property(e => e.CreatedByUserId).HasMaxLength(10);
-            entity.Property(e => e.DepartmentId).HasMaxLength(10);
-            entity.Property(e => e.EventId).HasMaxLength(10);
+            entity.Property(e => e.CreatedByUserId).HasMaxLength(21);
+            entity.Property(e => e.DepartmentId).HasMaxLength(21);
+            entity.Property(e => e.EventId).HasMaxLength(21);
 
             entity.HasOne(d => d.CreatedByUser).WithMany(p => p.EventComments)
                 .HasForeignKey(d => d.CreatedByUserId)
@@ -501,21 +471,19 @@ public partial class EventStrategyToolDbContext : DbContext
 
             entity.HasIndex(e => new { e.EventId, e.ComparisonMetricId }, "UQ_EventComparison_Event_Metric").IsUnique();
 
-            entity.Property(e => e.Id)
-                .HasMaxLength(10)
-                .HasDefaultValueSql("(N'ECM'+right(N'0000000'+CONVERT([nvarchar](10),NEXT VALUE FOR [dbo].[seq_EventComparison]),(7)))", "DF_EventComparison_Id");
-            entity.Property(e => e.ActualEnteredByUserId).HasMaxLength(10);
+            entity.Property(e => e.Id).HasMaxLength(21);
+            entity.Property(e => e.ActualEnteredByUserId).HasMaxLength(21);
             entity.Property(e => e.ActualValue).HasColumnType("decimal(18, 4)");
             entity.Property(e => e.Comment).HasMaxLength(500);
-            entity.Property(e => e.ComparisonMetricId).HasMaxLength(10);
+            entity.Property(e => e.ComparisonMetricId).HasMaxLength(21);
             entity.Property(e => e.Difference)
                 .HasComputedColumnSql("([ActualValue]-[ExpectedValue])", true)
                 .HasColumnType("decimal(19, 4)");
             entity.Property(e => e.DifferencePct)
                 .HasComputedColumnSql("(case when [ExpectedValue] IS NULL OR [ExpectedValue]=(0) OR [ActualValue] IS NULL then NULL else CONVERT([decimal](18,6),([ActualValue]-[ExpectedValue])/abs([ExpectedValue])) end)", true)
                 .HasColumnType("decimal(18, 6)");
-            entity.Property(e => e.EventId).HasMaxLength(10);
-            entity.Property(e => e.ExpectedEnteredByUserId).HasMaxLength(10);
+            entity.Property(e => e.EventId).HasMaxLength(21);
+            entity.Property(e => e.ExpectedEnteredByUserId).HasMaxLength(21);
             entity.Property(e => e.ExpectedValue).HasColumnType("decimal(18, 4)");
 
             entity.HasOne(d => d.ActualEnteredByUser).WithMany(p => p.EventComparisonActualEnteredByUsers)
@@ -543,8 +511,8 @@ public partial class EventStrategyToolDbContext : DbContext
 
             entity.ToTable("EventDepartment");
 
-            entity.Property(e => e.EventId).HasMaxLength(10);
-            entity.Property(e => e.DepartmentId).HasMaxLength(10);
+            entity.Property(e => e.EventId).HasMaxLength(21);
+            entity.Property(e => e.DepartmentId).HasMaxLength(21);
             entity.Property(e => e.DepartmentRole).HasMaxLength(20);
 
             entity.HasOne(d => d.Department).WithMany(p => p.EventDepartments)
@@ -564,13 +532,11 @@ public partial class EventStrategyToolDbContext : DbContext
 
             entity.HasIndex(e => new { e.EventId, e.ResponsibilityType }, "UQ_EventResponsibility").IsUnique();
 
-            entity.Property(e => e.Id)
-                .HasMaxLength(10)
-                .HasDefaultValueSql("(N'ERS'+right(N'0000000'+CONVERT([nvarchar](10),NEXT VALUE FOR [dbo].[seq_EventResponsibility]),(7)))", "DF_EventResponsibility_Id");
-            entity.Property(e => e.EventId).HasMaxLength(10);
+            entity.Property(e => e.Id).HasMaxLength(21);
+            entity.Property(e => e.EventId).HasMaxLength(21);
             entity.Property(e => e.PersonName).HasMaxLength(100);
             entity.Property(e => e.ResponsibilityType).HasMaxLength(30);
-            entity.Property(e => e.UserId).HasMaxLength(10);
+            entity.Property(e => e.UserId).HasMaxLength(21);
 
             entity.HasOne(d => d.Event).WithMany(p => p.EventResponsibilities)
                 .HasForeignKey(d => d.EventId)
@@ -586,11 +552,9 @@ public partial class EventStrategyToolDbContext : DbContext
         {
             entity.ToTable("EventRiskUpside");
 
-            entity.Property(e => e.Id)
-                .HasMaxLength(10)
-                .HasDefaultValueSql("(N'ERU'+right(N'0000000'+CONVERT([nvarchar](10),NEXT VALUE FOR [dbo].[seq_EventRiskUpside]),(7)))", "DF_EventRiskUpside_Id");
+            entity.Property(e => e.Id).HasMaxLength(21);
             entity.Property(e => e.Description).HasMaxLength(500);
-            entity.Property(e => e.EventId).HasMaxLength(10);
+            entity.Property(e => e.EventId).HasMaxLength(21);
             entity.Property(e => e.ItemType).HasMaxLength(10);
 
             entity.HasOne(d => d.Event).WithMany(p => p.EventRiskUpsides)
@@ -605,9 +569,7 @@ public partial class EventStrategyToolDbContext : DbContext
 
             entity.HasIndex(e => e.Name, "UQ_EventStatus_Name").IsUnique();
 
-            entity.Property(e => e.Id)
-                .HasMaxLength(10)
-                .HasDefaultValueSql("(N'EST'+right(N'0000000'+CONVERT([nvarchar](10),NEXT VALUE FOR [dbo].[seq_EventStatus]),(7)))", "DF_EventStatus_Id");
+            entity.Property(e => e.Id).HasMaxLength(21);
             entity.Property(e => e.Name).HasMaxLength(50);
         });
 
@@ -615,15 +577,13 @@ public partial class EventStrategyToolDbContext : DbContext
         {
             entity.ToTable("EventStatusHistory");
 
-            entity.Property(e => e.Id)
-                .HasMaxLength(10)
-                .HasDefaultValueSql("(N'ESH'+right(N'0000000'+CONVERT([nvarchar](10),NEXT VALUE FOR [dbo].[seq_EventStatusHistory]),(7)))", "DF_EventStatusHistory_Id");
+            entity.Property(e => e.Id).HasMaxLength(21);
             entity.Property(e => e.ChangedAt).HasDefaultValueSql("(sysutcdatetime())", "DF_EventStatusHistory_ChangedAt");
-            entity.Property(e => e.ChangedByUserId).HasMaxLength(10);
+            entity.Property(e => e.ChangedByUserId).HasMaxLength(21);
             entity.Property(e => e.Comment).HasMaxLength(500);
-            entity.Property(e => e.EventId).HasMaxLength(10);
-            entity.Property(e => e.FromStatusId).HasMaxLength(10);
-            entity.Property(e => e.ToStatusId).HasMaxLength(10);
+            entity.Property(e => e.EventId).HasMaxLength(21);
+            entity.Property(e => e.FromStatusId).HasMaxLength(21);
+            entity.Property(e => e.ToStatusId).HasMaxLength(21);
 
             entity.HasOne(d => d.ChangedByUser).WithMany(p => p.EventStatusHistories)
                 .HasForeignKey(d => d.ChangedByUserId)
@@ -651,17 +611,15 @@ public partial class EventStrategyToolDbContext : DbContext
 
             entity.HasIndex(e => new { e.EventId, e.TicketTierKindId, e.TierNumber }, "UQ_EventTicketTier").IsUnique();
 
-            entity.Property(e => e.Id)
-                .HasMaxLength(10)
-                .HasDefaultValueSql("(N'ETT'+right(N'0000000'+CONVERT([nvarchar](10),NEXT VALUE FOR [dbo].[seq_EventTicketTier]),(7)))", "DF_EventTicketTier_Id");
+            entity.Property(e => e.Id).HasMaxLength(21);
             entity.Property(e => e.ActualTotal)
                 .HasComputedColumnSql("(CONVERT([decimal](18,2),[ActualQuantity]*[UnitPrice]))", true)
                 .HasColumnType("decimal(18, 2)");
-            entity.Property(e => e.EventId).HasMaxLength(10);
+            entity.Property(e => e.EventId).HasMaxLength(21);
             entity.Property(e => e.ExpectedTotal)
                 .HasComputedColumnSql("(CONVERT([decimal](18,2),[ExpectedQuantity]*[UnitPrice]))", true)
                 .HasColumnType("decimal(18, 2)");
-            entity.Property(e => e.TicketTierKindId).HasMaxLength(10);
+            entity.Property(e => e.TicketTierKindId).HasMaxLength(21);
             entity.Property(e => e.TierName).HasMaxLength(100);
             entity.Property(e => e.UnitPrice).HasColumnType("decimal(18, 2)");
 
@@ -682,9 +640,7 @@ public partial class EventStrategyToolDbContext : DbContext
 
             entity.HasIndex(e => e.Name, "UQ_EventType_Name").IsUnique();
 
-            entity.Property(e => e.Id)
-                .HasMaxLength(10)
-                .HasDefaultValueSql("(N'ETY'+right(N'0000000'+CONVERT([nvarchar](10),NEXT VALUE FOR [dbo].[seq_EventType]),(7)))", "DF_EventType_Id");
+            entity.Property(e => e.Id).HasMaxLength(21);
             entity.Property(e => e.IsActive).HasDefaultValue(true, "DF_EventType_IsActive");
             entity.Property(e => e.Name).HasMaxLength(100);
         });
@@ -695,9 +651,7 @@ public partial class EventStrategyToolDbContext : DbContext
 
             entity.HasIndex(e => e.Name, "UQ_FundingSource_Name").IsUnique();
 
-            entity.Property(e => e.Id)
-                .HasMaxLength(10)
-                .HasDefaultValueSql("(N'FND'+right(N'0000000'+CONVERT([nvarchar](10),NEXT VALUE FOR [dbo].[seq_FundingSource]),(7)))", "DF_FundingSource_Id");
+            entity.Property(e => e.Id).HasMaxLength(21);
             entity.Property(e => e.IsActive).HasDefaultValue(true, "DF_FundingSource_IsActive");
             entity.Property(e => e.Name).HasMaxLength(100);
         });
@@ -706,9 +660,7 @@ public partial class EventStrategyToolDbContext : DbContext
         {
             entity.ToTable("GoverningEntity");
 
-            entity.Property(e => e.Id)
-                .HasMaxLength(10)
-                .HasDefaultValueSql("(N'GOV'+right(N'0000000'+CONVERT([nvarchar](10),NEXT VALUE FOR [dbo].[seq_GoverningEntity]),(7)))", "DF_GoverningEntity_Id");
+            entity.Property(e => e.Id).HasMaxLength(21);
             entity.Property(e => e.MaxScore).HasColumnType("decimal(5, 2)");
             entity.Property(e => e.MinScore).HasColumnType("decimal(5, 2)");
             entity.Property(e => e.Name).HasMaxLength(100);
@@ -718,9 +670,7 @@ public partial class EventStrategyToolDbContext : DbContext
         {
             entity.ToTable("ICP");
 
-            entity.Property(e => e.Id)
-                .HasMaxLength(10)
-                .HasDefaultValueSql("(N'ICP'+right(N'0000000'+CONVERT([nvarchar](10),NEXT VALUE FOR [dbo].[seq_ICP]),(7)))", "DF_ICP_Id");
+            entity.Property(e => e.Id).HasMaxLength(21);
             entity.Property(e => e.Description).HasMaxLength(500);
             entity.Property(e => e.IsActive).HasDefaultValue(true, "DF_ICP_IsActive");
             entity.Property(e => e.Name).HasMaxLength(100);
@@ -732,13 +682,11 @@ public partial class EventStrategyToolDbContext : DbContext
 
             entity.HasIndex(e => e.Name, "UQ_InputVariable_Name").IsUnique();
 
-            entity.Property(e => e.Id)
-                .HasMaxLength(10)
-                .HasDefaultValueSql("(N'IVR'+right(N'0000000'+CONVERT([nvarchar](10),NEXT VALUE FOR [dbo].[seq_InputVariable]),(7)))", "DF_InputVariable_Id");
+            entity.Property(e => e.Id).HasMaxLength(21);
             entity.Property(e => e.GovernanceWeight).HasColumnType("decimal(9, 6)");
             entity.Property(e => e.InputType).HasMaxLength(20);
             entity.Property(e => e.IsActive).HasDefaultValue(true, "DF_InputVariable_IsActive");
-            entity.Property(e => e.KpiId).HasMaxLength(10);
+            entity.Property(e => e.KpiId).HasMaxLength(21);
             entity.Property(e => e.Name).HasMaxLength(100);
             entity.Property(e => e.Unit).HasMaxLength(20);
 
@@ -757,11 +705,9 @@ public partial class EventStrategyToolDbContext : DbContext
                 .IsUnique()
                 .HasFilter("([Score] IS NOT NULL)");
 
-            entity.Property(e => e.Id)
-                .HasMaxLength(10)
-                .HasDefaultValueSql("(N'IVO'+right(N'0000000'+CONVERT([nvarchar](10),NEXT VALUE FOR [dbo].[seq_InputVariableOption]),(7)))", "DF_InputVariableOption_Id");
+            entity.Property(e => e.Id).HasMaxLength(21);
             entity.Property(e => e.Description).HasMaxLength(250);
-            entity.Property(e => e.InputVariableId).HasMaxLength(10);
+            entity.Property(e => e.InputVariableId).HasMaxLength(21);
             entity.Property(e => e.IsActive).HasDefaultValue(true, "DF_InputVariableOption_IsActive");
 
             entity.HasOne(d => d.InputVariable).WithMany(p => p.InputVariableOptions)
@@ -776,9 +722,7 @@ public partial class EventStrategyToolDbContext : DbContext
 
             entity.HasIndex(e => e.Name, "UQ_InviteMethod_Name").IsUnique();
 
-            entity.Property(e => e.Id)
-                .HasMaxLength(10)
-                .HasDefaultValueSql("(N'INV'+right(N'0000000'+CONVERT([nvarchar](10),NEXT VALUE FOR [dbo].[seq_InviteMethod]),(7)))", "DF_InviteMethod_Id");
+            entity.Property(e => e.Id).HasMaxLength(21);
             entity.Property(e => e.IsActive).HasDefaultValue(true, "DF_InviteMethod_IsActive");
             entity.Property(e => e.Name).HasMaxLength(100);
         });
@@ -787,11 +731,9 @@ public partial class EventStrategyToolDbContext : DbContext
         {
             entity.ToTable("KPI");
 
-            entity.Property(e => e.Id)
-                .HasMaxLength(10)
-                .HasDefaultValueSql("(N'KPI'+right(N'0000000'+CONVERT([nvarchar](10),NEXT VALUE FOR [dbo].[seq_KPI]),(7)))", "DF_KPI_Id");
-            entity.Property(e => e.AlignedDepartmentId).HasMaxLength(10);
-            entity.Property(e => e.EvaluationFactorId).HasMaxLength(10);
+            entity.Property(e => e.Id).HasMaxLength(21);
+            entity.Property(e => e.AlignedDepartmentId).HasMaxLength(21);
+            entity.Property(e => e.EvaluationFactorId).HasMaxLength(21);
             entity.Property(e => e.Name).HasMaxLength(100);
             entity.Property(e => e.ScoringMethod).HasMaxLength(30);
             entity.Property(e => e.Unit).HasMaxLength(20);
@@ -809,9 +751,7 @@ public partial class EventStrategyToolDbContext : DbContext
 
         modelBuilder.Entity<Objective>(entity =>
         {
-            entity.Property(e => e.Id)
-                .HasMaxLength(10)
-                .HasDefaultValueSql("(N'OBJ'+right(N'0000000'+CONVERT([nvarchar](10),NEXT VALUE FOR [dbo].[seq_Objectives]),(7)))", "DF_Objectives_Id");
+            entity.Property(e => e.Id).HasMaxLength(21);
             entity.Property(e => e.DirectInvitesPct).HasColumnType("decimal(9, 6)");
             entity.Property(e => e.EmployeeAttendancePct).HasColumnType("decimal(9, 6)");
             entity.Property(e => e.Explanation).HasMaxLength(2000);
@@ -827,16 +767,14 @@ public partial class EventStrategyToolDbContext : DbContext
 
             entity.HasIndex(e => new { e.ObjectiveId, e.MetricName }, "UQ_Objective_BenchMark").IsUnique();
 
-            entity.Property(e => e.Id)
-                .HasMaxLength(10)
-                .HasDefaultValueSql("(N'OBM'+right(N'0000000'+CONVERT([nvarchar](10),NEXT VALUE FOR [dbo].[seq_ObjectiveBenchMark]),(7)))", "DF_Objective_BenchMark_Id");
+            entity.Property(e => e.Id).HasMaxLength(21);
             entity.Property(e => e.DisplayText).HasMaxLength(100);
-            entity.Property(e => e.InputVariableId).HasMaxLength(10);
-            entity.Property(e => e.KpiId).HasMaxLength(10);
+            entity.Property(e => e.InputVariableId).HasMaxLength(21);
+            entity.Property(e => e.KpiId).HasMaxLength(21);
             entity.Property(e => e.MaxValue).HasColumnType("decimal(18, 6)");
             entity.Property(e => e.MetricName).HasMaxLength(100);
             entity.Property(e => e.MinValue).HasColumnType("decimal(18, 6)");
-            entity.Property(e => e.ObjectiveId).HasMaxLength(10);
+            entity.Property(e => e.ObjectiveId).HasMaxLength(21);
 
             entity.HasOne(d => d.InputVariable).WithMany(p => p.ObjectiveBenchMarks)
                 .HasForeignKey(d => d.InputVariableId)
@@ -858,9 +796,7 @@ public partial class EventStrategyToolDbContext : DbContext
 
             entity.HasIndex(e => e.Name, "UQ_PnlCategory_Name").IsUnique();
 
-            entity.Property(e => e.Id)
-                .HasMaxLength(10)
-                .HasDefaultValueSql("(N'PCT'+right(N'0000000'+CONVERT([nvarchar](10),NEXT VALUE FOR [dbo].[seq_PnlCategory]),(7)))", "DF_PnlCategory_Id");
+            entity.Property(e => e.Id).HasMaxLength(21);
             entity.Property(e => e.Name).HasMaxLength(50);
         });
 
@@ -870,17 +806,15 @@ public partial class EventStrategyToolDbContext : DbContext
 
             entity.HasIndex(e => new { e.EventId, e.PnlLineTypeId }, "UQ_PnlLine_Event_Type").IsUnique();
 
-            entity.Property(e => e.Id)
-                .HasMaxLength(10)
-                .HasDefaultValueSql("(N'PLN'+right(N'0000000'+CONVERT([nvarchar](10),NEXT VALUE FOR [dbo].[seq_PnlLine]),(7)))", "DF_PnlLine_Id");
+            entity.Property(e => e.Id).HasMaxLength(21);
             entity.Property(e => e.ActualAmount).HasColumnType("decimal(18, 2)");
             entity.Property(e => e.Difference)
                 .HasComputedColumnSql("([ActualAmount]-[ExpectedAmount])", true)
                 .HasColumnType("decimal(19, 2)");
-            entity.Property(e => e.EventId).HasMaxLength(10);
+            entity.Property(e => e.EventId).HasMaxLength(21);
             entity.Property(e => e.ExpectedAmount).HasColumnType("decimal(18, 2)");
             entity.Property(e => e.Note).HasMaxLength(500);
-            entity.Property(e => e.PnlLineTypeId).HasMaxLength(10);
+            entity.Property(e => e.PnlLineTypeId).HasMaxLength(21);
             entity.Property(e => e.RateUsed).HasColumnType("decimal(9, 6)");
 
             entity.HasOne(d => d.Event).WithMany(p => p.PnlLines)
@@ -900,15 +834,13 @@ public partial class EventStrategyToolDbContext : DbContext
 
             entity.HasIndex(e => e.Name, "UQ_PnlLineType_Name").IsUnique();
 
-            entity.Property(e => e.Id)
-                .HasMaxLength(10)
-                .HasDefaultValueSql("(N'PLT'+right(N'0000000'+CONVERT([nvarchar](10),NEXT VALUE FOR [dbo].[seq_PnlLineType]),(7)))", "DF_PnlLineType_Id");
+            entity.Property(e => e.Id).HasMaxLength(21);
             entity.Property(e => e.AmountPerTicket).HasColumnType("decimal(18, 4)");
             entity.Property(e => e.CalculationMethod).HasMaxLength(30);
             entity.Property(e => e.DefaultRate).HasColumnType("decimal(9, 6)");
             entity.Property(e => e.IsActive).HasDefaultValue(true, "DF_PnlLineType_IsActive");
             entity.Property(e => e.Name).HasMaxLength(100);
-            entity.Property(e => e.PnlCategoryId).HasMaxLength(10);
+            entity.Property(e => e.PnlCategoryId).HasMaxLength(21);
             entity.Property(e => e.Sign).HasDefaultValue((short)1, "DF_PnlLineType_Sign");
 
             entity.HasOne(d => d.PnlCategory).WithMany(p => p.PnlLineTypes)
@@ -921,9 +853,7 @@ public partial class EventStrategyToolDbContext : DbContext
         {
             entity.ToTable("Role");
 
-            entity.Property(e => e.Id)
-                .HasMaxLength(10)
-                .HasDefaultValueSql("(N'ROL'+right(N'0000000'+CONVERT([nvarchar](10),NEXT VALUE FOR [dbo].[seq_Role]),(7)))", "DF_Role_Id");
+            entity.Property(e => e.Id).HasMaxLength(21);
             entity.Property(e => e.Description).HasMaxLength(500);
             entity.Property(e => e.Name).HasMaxLength(50);
         });
@@ -934,9 +864,7 @@ public partial class EventStrategyToolDbContext : DbContext
 
             entity.HasIndex(e => e.Name, "UQ_TicketTierKind_Name").IsUnique();
 
-            entity.Property(e => e.Id)
-                .HasMaxLength(10)
-                .HasDefaultValueSql("(N'TTK'+right(N'0000000'+CONVERT([nvarchar](10),NEXT VALUE FOR [dbo].[seq_TicketTierKind]),(7)))", "DF_TicketTierKind_Id");
+            entity.Property(e => e.Id).HasMaxLength(21);
             entity.Property(e => e.Name).HasMaxLength(50);
         });
 
@@ -950,16 +878,14 @@ public partial class EventStrategyToolDbContext : DbContext
                 .IsUnique()
                 .HasFilter("([LoginName] IS NOT NULL)");
 
-            entity.Property(e => e.Id)
-                .HasMaxLength(10)
-                .HasDefaultValueSql("(N'USR'+right(N'0000000'+CONVERT([nvarchar](10),NEXT VALUE FOR [dbo].[seq_User]),(7)))", "DF_User_Id");
+            entity.Property(e => e.Id).HasMaxLength(21);
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("(sysutcdatetime())", "DF_User_CreatedAt");
-            entity.Property(e => e.DepartmentId).HasMaxLength(10);
+            entity.Property(e => e.DepartmentId).HasMaxLength(21);
             entity.Property(e => e.Email).HasMaxLength(254);
             entity.Property(e => e.FullName).HasMaxLength(100);
             entity.Property(e => e.IsActive).HasDefaultValue(true, "DF_User_IsActive");
             entity.Property(e => e.LoginName).HasMaxLength(256);
-            entity.Property(e => e.RoleId).HasMaxLength(10);
+            entity.Property(e => e.RoleId).HasMaxLength(21);
 
             entity.HasOne(d => d.Department).WithMany(p => p.Users)
                 .HasForeignKey(d => d.DepartmentId)
@@ -981,7 +907,7 @@ public partial class EventStrategyToolDbContext : DbContext
             entity.Property(e => e.Comment).HasMaxLength(500);
             entity.Property(e => e.Difference).HasColumnType("decimal(19, 4)");
             entity.Property(e => e.DifferencePct).HasColumnType("decimal(18, 6)");
-            entity.Property(e => e.EventId).HasMaxLength(10);
+            entity.Property(e => e.EventId).HasMaxLength(21);
             entity.Property(e => e.EventName).HasMaxLength(150);
             entity.Property(e => e.ExpectedValue).HasColumnType("decimal(18, 4)");
             entity.Property(e => e.Metric).HasMaxLength(100);
