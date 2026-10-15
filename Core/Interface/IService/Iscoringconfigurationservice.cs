@@ -17,4 +17,5 @@ public interface IScoringConfigurationService
     Task<ObjectiveDto?> GetObjectiveAsync(string objectiveId);
     Task<List<string>> SaveObjectiveAsync(ObjectiveDto objective);
     Task<List<string>> SaveBenchmarksAsync(string objectiveId, List<ObjectiveBenchmarkDto> benchmarks);
+    Task<ScoringRulesDto> GetScoringRulesAsync();
 }

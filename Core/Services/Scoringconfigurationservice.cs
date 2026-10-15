@@ -101,7 +101,7 @@ public class ScoringConfigurationService : IScoringConfigurationService
         await using IUnitOfWork unitOfWork = _unitOfWorkFactory.Create();
         IRepository<Kpi> kpiRepository = unitOfWork.Repository<Kpi>();
 
-       
+      
         List<Kpi> factorKpis = await kpiRepository.ListAsync(k => k.EvaluationFactorId == factorId);
 
         if (factorKpis.Count != weights.Count)
@@ -147,6 +147,7 @@ public class ScoringConfigurationService : IScoringConfigurationService
         {
             BandingThresholdDto bandDto = GenericMapper.Map<BandingThreshold, BandingThresholdDto>(band);
 
+            
             bandDto.Score = Convert.ToInt32(band.Score);
 
             result.Add(bandDto);
@@ -174,7 +175,7 @@ public class ScoringConfigurationService : IScoringConfigurationService
             return errors;
         }
 
-      
+       
         List<BandingThreshold> existingBands = await bandRepository.ListAsync(b => b.KpiId == kpiId);
 
         foreach (BandingThresholdDto item in bands)
@@ -200,6 +201,7 @@ public class ScoringConfigurationService : IScoringConfigurationService
         return errors;
     }
 
+   
     public async Task<List<InputVariableDto>> GetInputVariablesAsync()
     {
         await using IUnitOfWork unitOfWork = _unitOfWorkFactory.Create();
@@ -274,14 +276,14 @@ public class ScoringConfigurationService : IScoringConfigurationService
             return errors;
         }
 
-        
+      
         errors = ScoringConfigurationRules.CheckOptions(variable.InputType, options);
         if (errors.Count > 0)
         {
             return errors;
         }
 
-        
+       
         List<InputVariableOption> existingOptions = await optionRepository.ListAsync(o => o.InputVariableId == inputVariableId);
 
         if (existingOptions.Count != options.Count)
@@ -299,6 +301,7 @@ public class ScoringConfigurationService : IScoringConfigurationService
                 continue;
             }
 
+           
             option.Description = item.Description.Trim();
             option.SortOrder = item.SortOrder;
             option.IsActive = item.IsActive;
@@ -356,6 +359,8 @@ public class ScoringConfigurationService : IScoringConfigurationService
         return errors;
     }
 
+  
+
     public async Task<List<ObjectiveDto>> GetObjectivesAsync()
     {
         await using IUnitOfWork unitOfWork = _unitOfWorkFactory.Create();
@@ -363,7 +368,7 @@ public class ScoringConfigurationService : IScoringConfigurationService
 
         List<Objective> objectives = await objectiveRepository.ListAsync();
 
-      
+        
         objectives.Sort((first, second) => string.CompareOrdinal(first.Id, second.Id));
 
         List<ObjectiveDto> result = GenericMapper.MapList<Objective, ObjectiveDto>(objectives);
@@ -410,7 +415,7 @@ public class ScoringConfigurationService : IScoringConfigurationService
             return errors;
         }
 
-        
+       
         string newName = objective.Name.Trim();
         bool nameTaken = await objectiveRepository.AnyAsync(o => o.Name == newName && o.Id != objective.Id);
         if (nameTaken)
@@ -443,7 +448,7 @@ public class ScoringConfigurationService : IScoringConfigurationService
         await using IUnitOfWork unitOfWork = _unitOfWorkFactory.Create();
         IRepository<ObjectiveBenchMark> benchmarkRepository = unitOfWork.Repository<ObjectiveBenchMark>();
 
-     
+       
         List<ObjectiveBenchMark> existingBenchmarks = await benchmarkRepository.ListAsync(b => b.ObjectiveId == objectiveId);
 
         foreach (ObjectiveBenchmarkDto item in benchmarks)
@@ -454,6 +459,8 @@ public class ScoringConfigurationService : IScoringConfigurationService
                 errors.Add($"Benchmarks: {item.Id} does not belong to this objective.");
                 continue;
             }
+
+         
             benchmark.DisplayText = item.DisplayText.Trim();
             benchmark.MinValue = item.MinValue;
             benchmark.MaxValue = item.MaxValue;
@@ -468,6 +475,81 @@ public class ScoringConfigurationService : IScoringConfigurationService
         await unitOfWork.SaveChangesAsync();
         return errors;
     }
+
+ 
+
+    public async Task<ScoringRulesDto> GetScoringRulesAsync()
+    {
+       
+        await using IUnitOfWork unitOfWork = _unitOfWorkFactory.Create();
+
+        List<EvaluationFactor> factors = await unitOfWork.Repository<EvaluationFactor>().ListAsync();
+        List<Kpi> kpis = await unitOfWork.Repository<Kpi>().ListAsync();
+        List<BandingThreshold> bands = await unitOfWork.Repository<BandingThreshold>().ListAsync();
+        List<InputVariable> variables = await unitOfWork.Repository<InputVariable>().ListAsync(v => v.IsActive);
+        List<InputVariableOption> options = await unitOfWork.Repository<InputVariableOption>().ListAsync(o => o.IsActive);
+
+        factors.Sort((first, second) => first.SortOrder.CompareTo(second.SortOrder));
+        kpis.Sort((first, second) => first.SortOrder.CompareTo(second.SortOrder));
+        variables.Sort((first, second) => first.SortOrder.CompareTo(second.SortOrder));
+        options.Sort((first, second) => first.SortOrder.CompareTo(second.SortOrder));
+
+        ScoringRulesDto rules = new ScoringRulesDto();
+
+       
+        foreach (EvaluationFactor factor in factors)
+        {
+            EvaluationFactorDto factorDto = GenericMapper.Map<EvaluationFactor, EvaluationFactorDto>(factor);
+
+            foreach (Kpi kpi in kpis)
+            {
+                if (kpi.EvaluationFactorId == factor.Id)
+                {
+                    factorDto.Kpis.Add(GenericMapper.Map<Kpi, KpiDto>(kpi));
+                }
+            }
+
+            rules.Factors.Add(factorDto);
+        }
+
+        
+        bands.Sort((first, second) =>
+        {
+            int byKpi = string.CompareOrdinal(first.KpiId, second.KpiId);
+            if (byKpi != 0)
+            {
+                return byKpi;
+            }
+
+            return Convert.ToInt32(first.Score).CompareTo(Convert.ToInt32(second.Score));
+        });
+
+        foreach (BandingThreshold band in bands)
+        {
+            BandingThresholdDto bandDto = GenericMapper.Map<BandingThreshold, BandingThresholdDto>(band);
+            bandDto.Score = Convert.ToInt32(band.Score);
+            rules.Bands.Add(bandDto);
+        }
+
+        
+        foreach (InputVariable variable in variables)
+        {
+            InputVariableDto variableDto = GenericMapper.Map<InputVariable, InputVariableDto>(variable);
+
+            foreach (InputVariableOption option in options)
+            {
+                if (option.InputVariableId == variable.Id)
+                {
+                    variableDto.Options.Add(ToOptionDto(option));
+                }
+            }
+
+            rules.InputVariables.Add(variableDto);
+        }
+
+        return rules;
+    }
+
     private static InputVariableOptionDto ToOptionDto(InputVariableOption option)
     {
         InputVariableOptionDto optionDto = GenericMapper.Map<InputVariableOption, InputVariableOptionDto>(option);

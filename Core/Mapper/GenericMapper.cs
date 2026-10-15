@@ -1,16 +1,14 @@
 ﻿using System.Collections.Concurrent;
 using System.Reflection;
-
 namespace Core.Mapper;
-
 
 public static class GenericMapper
 {
-    
+   
     private static readonly ConcurrentDictionary<(Type Source, Type Destination), List<PropertyPair>> _cache =
         new ConcurrentDictionary<(Type Source, Type Destination), List<PropertyPair>>();
 
-   
+
     public static TDestination Map<TSource, TDestination>(TSource source) where TDestination : new()
     {
         TDestination destination = new TDestination();
@@ -18,7 +16,7 @@ public static class GenericMapper
         return destination;
     }
 
-   
+    
     public static void MapInto<TSource, TDestination>(TSource source, TDestination destination)
     {
         if (source == null)
@@ -40,6 +38,7 @@ public static class GenericMapper
         }
     }
 
+  
     public static List<TDestination> MapList<TSource, TDestination>(IEnumerable<TSource> sources) where TDestination : new()
     {
         List<TDestination> result = new List<TDestination>();

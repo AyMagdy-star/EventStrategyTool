@@ -1,10 +1,13 @@
 ﻿using Shared.DTOs.ScoringConfiguration;
 
 namespace Core.ScoringConfiguration;
+
 public static class ScoringConfigurationRules
 {
-  
+   
     private const decimal AllowedDifference = 0.0001m;
+
+  
     public static List<string> CheckWeights(List<WeightUpdateDto> weights, string groupName)
     {
         List<string> errors = new List<string>();
@@ -35,6 +38,8 @@ public static class ScoringConfigurationRules
 
         return errors;
     }
+
+    
     public static List<string> CheckBands(List<BandingThresholdDto> bands)
     {
         List<string> errors = new List<string>();
@@ -79,7 +84,7 @@ public static class ScoringConfigurationRules
                 errors.Add($"Bands: score {score} needs a minimum value.");
             }
 
-            
+           
             if (score < 5 && band.MaxValue == null)
             {
                 errors.Add($"Bands: score {score} needs a maximum value.");
@@ -103,11 +108,13 @@ public static class ScoringConfigurationRules
 
         return errors;
     }
+
+   
     public static List<string> CheckOptions(string inputType, List<InputVariableOptionDto> options)
     {
         List<string> errors = new List<string>();
 
-      
+        
         foreach (InputVariableOptionDto option in options)
         {
             if (string.IsNullOrWhiteSpace(option.Description))
